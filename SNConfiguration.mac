@@ -1,0 +1,19 @@
+/SNGenerator/MarleyConfig myconfig.js
+/SNGenerator/NSNNeutrino 0
+/SNGenerator/RandomVertex true
+/SNGenerator/TimeWindow 0.1 s
+/SNGenerator/VertexX 500 cm
+/SNGenerator/VertexY 500 cm
+/SNGenerator/VertexZ 500 cm
+/SNGenerator/GenVolX 1300 cm
+/SNGenerator/GenVolY 650 cm
+/SNGenerator/GenVolZ 2000 cm
+/SNGenerator/Background true
+/SNGenerator/TimeWindow 0.1 s
+/SNGenerator/nAr39 7070
+/SNGenerator/nAr42 0
+/SNGenerator/nKr85 805
+/SNGenerator/nK42 0
+/SNGenerator/nBi214 70
+/SNGenerator/nPb214 70
+/SNGenerator/nRn222 280
