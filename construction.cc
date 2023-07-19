@@ -21,8 +21,8 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 // function Instance() from the G4NistManager class.
 
 	// define lAr material
-        G4Material *lAr = new G4Material("lAr", 18, 39.948 * g / mole, 1.3982 * g / cm3);
-
+    G4Material *lAr = new G4Material("lAr", 18, 39.948 * g / mole, 1.3982 * g / cm3);
+	G4Material* detector_mat = G4NistManager::Instance()->FindOrBuildMaterial("G4_lAr");
 	// Write down all the constants as a function of the energy
 	G4double lArFastScintEnergy[17] = { 7.2*eV,  7.9*eV,  8.3*eV,  8.6*eV,  8.9*eV,  9.1*eV,  9.3*eV,  9.6*eV,  9.7*eV,  9.8*eV,  10*eV,  10.2*eV,  10.3*eV,  10.6*eV,  11*eV,  11.6*eV,  11.9*eV};
 
@@ -70,10 +70,7 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 	// Add lAr propeties to lAr
 	lAr->SetMaterialPropertiesTable(lAr_MPT);
 
-	lAr->GetIonisation()->SetBirksConstant(0.0*cm/MeV);
-
-
-
+	lAr->GetIonisation()->SetBirksConstant(0.069*cm/MeV);
 
 	// define STEEL_STAINLESS_FE7CR2NI. First I need to define some elements:
 
@@ -86,9 +83,7 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 
 	G4Element *Nickel=new G4Element("Nickel", "Ni", 28, 58.6934* g / mole);
 
-
 	G4Material *STEEL_STAINLESS_Fe7Cr2Ni = new G4Material("STEEL_STAINLESS_Fe7Cr2Ni",7.85*g/cm3,4);
-
 
 	STEEL_STAINLESS_Fe7Cr2Ni -> AddElement(Chromium, 0.1792);
 	STEEL_STAINLESS_Fe7Cr2Ni -> AddElement(Iron, 0.7298);
@@ -104,7 +99,7 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 	
 //	G4double STEEL_STAINLESS_Fe7Cr2Ni_ReflectivitySpectrum[12]={1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.};
 
-        G4double STEEL_STAINLESS_Fe7Cr2Ni_ReflectivitySpectrum[12]={ 0.66, 0.64, 0.62, 0.60, 0.59, 0.57, 0.53, 0.47, 0.39, 0.36, 0.27, 0.25};
+    G4double STEEL_STAINLESS_Fe7Cr2Ni_ReflectivitySpectrum[12]={ 0.66, 0.64, 0.62, 0.60, 0.59, 0.57, 0.53, 0.47, 0.39, 0.36, 0.27, 0.25};
 
 	// create the MPT for Stainless Steel:
 
@@ -117,11 +112,9 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 
 	// Define surface properties of stainless steel 
 
+	G4MaterialPropertiesTable* PMTSurfaceMPT = new G4MaterialPropertiesTable();
 
-         G4MaterialPropertiesTable* PMTSurfaceMPT = new G4MaterialPropertiesTable();
-
-         PMTSurfaceMPT -> AddProperty("REFLECTIVITY", STEEL_STAINLESS_Fe7Cr2Ni_ReflectivityEnergy, STEEL_STAINLESS_Fe7Cr2Ni_ReflectivitySpectrum,12 );
-
+	PMTSurfaceMPT -> AddProperty("REFLECTIVITY", STEEL_STAINLESS_Fe7Cr2Ni_ReflectivityEnergy, STEEL_STAINLESS_Fe7Cr2Ni_ReflectivitySpectrum,12 );
 
 	G4float halfLenX = 675;
 	
@@ -141,7 +134,7 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 //	worldMat->SetMaterialPropertiesTable(mptWorld);
 	// worldMat is our world material, an object from G4material, whose value we set to be the return 
 	// value from the FindOrBuildMaterial("G4_AIR") function applied to nist
-        G4Box *solidWorld = new G4Box("solidWorld", 685.*cm, 340.*cm, 1030.*cm);
+	G4Box *solidWorld = new G4Box("solidWorld", 685.*cm, 340.*cm, 1030.*cm);
 	// we have to give some values
 	logicWorld = new G4LogicalVolume(solidWorld, lAr, "logicWorld");
 	// logicWorld is the logical volume that combines the size and the material
@@ -149,8 +142,9 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 
 	// Hollow box to reflect photons that hit the boundaries
 
-	G4double maxStep = 0.5;
-  	fStepLimit = new G4UserLimits(maxStep);
+	G4double maxStep = 1/CLHEP::cm;
+  	fStepLimit = new G4UserLimits();
+	fStepLimit->SetMaxAllowedStep(maxStep);
   	logicWorld->SetUserLimits(fStepLimit);      
 
 	G4Box *outerBox = new G4Box("outerBox", (halfLenX+2.)*cm , (halfLenY+2.)*cm, (halfLenZ+2.)*cm );
@@ -179,7 +173,6 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 	
 	G4int nRows = 90;
 	G4int nCols = 125; 
-
 
 	std::cout << "-----> The number of detectors is :" << nRows*nCols << std::endl;
 

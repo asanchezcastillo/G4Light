@@ -18,6 +18,12 @@
 // MARLEY includes
 #include "marley/Generator.hh"
 
+// ROOT includes 
+#include "TROOT.h"
+#include "TFile.h"
+#include "TH1D.h"
+#include "TH2D.h"
+
 class SupernovaGenerator : public G4VUserPrimaryGeneratorAction
 
 {
@@ -58,8 +64,13 @@ private:
 
   marley::Generator marley_generator_;
 
+  TH1D  * th1_;
+  TH2D  * th2_;
+  TFile * tfile_;
+
   G4ThreeVector RandomVertex(G4double , G4double , G4double );
- 
+  G4double SampleTime(G4double);
+
   void MarleyInitialize(std::string); // Initialize the marley::generator object
   void MarleyGeneratePrimaries(G4Event*); // Generate Marley neutrinos
   void BackgroundGeneratePrimaries(G4Event*); // Generate the background for all radioisotopes

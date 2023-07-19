@@ -16,27 +16,35 @@
 #include "action.hh"
 #include "SupernovaGenerator.hh"
 #include "SupernovaAction.hh"
+#include <G4EmStandardPhysics_option4.hh>
+#include "G4StepLimiterPhysics.hh"
 
 int main(int argc, char** argv)
 {
-	#ifdef G4MULTITHREADED
-		G4MTRunManager *runManager = new G4MTRunManager();
-		runManager->SetNumberOfThreads(2*(G4Threading::G4GetNumberOfCores()));
-	#else
+	//#ifdef G4MULTITHREADED
+	//	G4MTRunManager *runManager = new G4MTRunManager();
+	//	runManager->SetNumberOfThreads(2*(G4Threading::G4GetNumberOfCores()));
+	//#else
 
 		G4RunManager * runManager = new G4RunManager();
-	#endif
+	//#endif
 
 	runManager->SetUserInitialization(new MyDetectorConstruction());
 //	runManager->SetUserInitialization(new MyPhysicsList());
  	G4VModularPhysicsList* physics_list = new FTFP_BERT_HP();
 	physics_list->ReplacePhysics(new G4EmStandardPhysics_option4());
+	G4StepLimiterPhysics* stepLimitPhys = new G4StepLimiterPhysics();
+	physics_list->RegisterPhysics(stepLimitPhys);
+	/*
   	G4OpticalPhysics *opticalPhysics = new G4OpticalPhysics();
 	G4OpticalParameters *opParams = G4OpticalParameters::Instance();
 	opParams -> SetScintTrackSecondariesFirst(true);
 	opParams -> SetScintByParticleType(false);
+	opParams->SetScintStackPhotons(false);
+	opParams->SetCerenkovStackPhotons(false);
 	opParams->SetCerenkovTrackSecondariesFirst(false);
 	physics_list->RegisterPhysics (opticalPhysics);
+	*/
 	runManager->SetUserInitialization(physics_list);
 
 	char* marleyFile=0;
@@ -67,8 +75,8 @@ int main(int argc, char** argv)
 
 	if(marleyFile==0 && generatorFile==0)
 	{              
-		runManager->SetUserInitialization(new MyActionInitialization());
-		runManager->Initialize();
+	runManager->SetUserInitialization(new MyActionInitialization());
+	runManager->Initialize();
         G4UImanager *UImanager = G4UImanager::GetUIpointer();
         UImanager->ApplyCommand("/process/inactivate Cerenkov");
         UImanager->ApplyCommand("/process/inactivate Scintillation");
@@ -94,8 +102,6 @@ int main(int argc, char** argv)
 		for(int i = 0; i<nRuns; i ++ )
 		{
 			G4UImanager *UImanager = G4UImanager::GetUIpointer();
-			UImanager->ApplyCommand("/process/inactivate Cerenkov");
-			UImanager->ApplyCommand("/process/inactivate Scintillation");
 			UImanager->ApplyCommand("/control/execute " + marFile);
 			runManager->BeamOn(1);
 		}
@@ -113,8 +119,6 @@ int main(int argc, char** argv)
 		runManager->Initialize();
 		for(int i = 0; i<nRuns; i ++ )
 		{
-			UImanager->ApplyCommand("/process/inactivate Cerenkov");
-			UImanager->ApplyCommand("/process/inactivate Scintillation");
 			UImanager->ApplyCommand("/control/execute " + genFile);
 			runManager->BeamOn(1);
 		}

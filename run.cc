@@ -27,9 +27,10 @@ MyRunAction::MyRunAction()
 	man->CreateNtupleDColumn("Z");
 	man->CreateNtupleDColumn("time");
 	man->CreateNtupleIColumn("pdg");
+	man->CreateNtupleDColumn("step_length");
     man->FinishNtuple(2);
 
- 	man->CreateNtuple("event", "event");
+ 	man->CreateNtuple("Hits", "Hits");
     man->CreateNtupleDColumn("hit_energy_deposit");
 	man->CreateNtupleDColumn("hit_start_x");
 	man->CreateNtupleDColumn("hit_start_y");
@@ -43,33 +44,49 @@ MyRunAction::MyRunAction()
 	man->CreateNtupleIColumn("eventID");
 	man->CreateNtupleDColumn("hit_length");
 	man->CreateNtupleIColumn("trackID");
+	man->CreateNtupleIColumn("run");
     man->FinishNtuple(3);
 
-	
-	man->CreateNtuple("Primary", "Primary");
-    man->CreateNtupleIColumn("pdg");
-	man->CreateNtupleDColumn("energy");
-	man->CreateNtupleDColumn("Px");
-	man->CreateNtupleDColumn("Py");
-	man->CreateNtupleDColumn("Pz");
-	man->CreateNtupleDColumn("VertexX");
-	man->CreateNtupleDColumn("VertexY");
-	man->CreateNtupleDColumn("VertexZ");
+	man->CreateNtuple("InitialParticle", "InitialParticle");
+    man->CreateNtupleIColumn("InitialParticlePDG");
+	man->CreateNtupleDColumn("InitialParticleEnergy");
+	man->CreateNtupleDColumn("InitialParticlePx");
+	man->CreateNtupleDColumn("InitialParticlePy");
+	man->CreateNtupleDColumn("InitialParticlePz");
+	man->CreateNtupleDColumn("InteractionTime");
 	man->FinishNtuple(4);
 	
+	man->CreateNtuple("PrimaryParticle", "Primary");
+    man->CreateNtupleIColumn("PrimaryParticlePDG");
+	man->CreateNtupleDColumn("PrimaryParticleEnergy");
+	man->CreateNtupleDColumn("PrimaryParticlePx");
+	man->CreateNtupleDColumn("PrimaryParticlePy");
+	man->CreateNtupleDColumn("PrimaryParticlePz");
+	man->FinishNtuple(5);
+
+	man->CreateNtuple("Background", "Background");
+	man->CreateNtupleDColumn("DecayTime");
+	man->FinishNtuple(6);
 }
+
 
 MyRunAction::~MyRunAction()
 {}
 
 void MyRunAction::BeginOfRunAction(const G4Run* run)
 {
-// First of all is to knwo where the output file has to be created
+	// First of all is to know where the output file has to be created
 	G4AnalysisManager *man = G4AnalysisManager::Instance();	
 	G4int runID = run->GetRunID();
 	std::stringstream strRunID;
-	strRunID << runID;;
+	strRunID << runID;
 	man->OpenFile("analysis/output"+strRunID.str()+ ".root");
+	//Random seed to obtain different events
+	std::cout << " ----------------------------------------> Setting a new seed " << std::endl; 
+	G4Random::setTheEngine(new CLHEP::RanecuEngine());
+	G4long seed = time(NULL);
+	G4Random::setTheSeed(seed);
+
 }
 
 void MyRunAction::EndOfRunAction(const G4Run*)

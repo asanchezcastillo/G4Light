@@ -22,11 +22,12 @@ gamma_z.clear();
 void EventPlotting()
 {
 
-  string InputFile = "analysis/output1.root";
+  string InputFile = "analysis/output0.root";
   TFile *f = new TFile(InputFile.c_str());
   TTree *tree = (TTree *)f->Get("event");
+  TTree *tree_primary= (TTree *)f->Get("Primary");
   Int_t eventID, pdg;
-  Double_t hitX_start, hitX_end, hitY_start, hitY_end, hitZ_start, hitZ_end, time_start, time_end, length, edep;
+  Double_t hitX_start, hitX_end, hitY_start, hitY_end, hitZ_start, hitZ_end, time_start, time_end, length, edep, PrimaryEnergy;
 
   tree->SetBranchAddress("eventID", &eventID);
   tree->SetBranchAddress("hit_start_x", &hitX_start);
@@ -45,6 +46,7 @@ void EventPlotting()
 
   for(int n = 0 ; n<nEvents; n++)
   {
+
 
     string eventID_str = "eventID=="+std::to_string(n);
     const char* cut_event_str = eventID_str.c_str();
@@ -165,14 +167,14 @@ void EventPlotting()
     legend->AddEntry(graph_alpha,"alpha","p");
     }
 
-    mg->Draw("AP");
+    //mg->Draw("AP");
 
     //mg->GetYaxis()->SetRangeUser(-650,650);
     //mg->GetXaxis()->SetLimits(-1000,1000);
     //mg->GetYaxis()->SetRangeUser(-650,650);
 
-    legend->Draw();
-
+    //legend->Draw();
+    tree_primary->Draw("energy>>HISTOGRAMNAME", "pdg==12 || pdg==11");
     c1->Update();
     c1->Modified();
     c1->WaitPrimitive();
