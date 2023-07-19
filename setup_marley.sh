@@ -16,6 +16,7 @@ export PATH=${PATH}:${THIS_DIRECTORY}/build
 if [ "$(uname)" = "Darwin" ]; then
   # macOS platform
   export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${THIS_DIRECTORY}/build:'/Users/alejandrosanchez/software/geant4/geant4-v11.0.2-install/lib/':'/Users/alejandrosanchez/opt/anaconda3/lib/'
+  #export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${THIS_DIRECTORY}/build
 else
   # Assume a GNU/Linux platform
   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${THIS_DIRECTORY}/build

@@ -27,6 +27,8 @@ void MyEventAction::SaveEdep(const G4Step* step)
 {
 	G4double edep = step->GetTotalEnergyDeposit();
 
+	G4double step_length = step->GetStepLength();
+
 	G4ThreeVector stepPosition = step->GetPreStepPoint()->GetPosition();
 
 	G4double xPos = stepPosition[0];
@@ -44,6 +46,7 @@ void MyEventAction::SaveEdep(const G4Step* step)
 	man->FillNtupleDColumn(2,3,zPos);
 	man->FillNtupleDColumn(2,4,time);
 	man->FillNtupleIColumn(2,5, pdg);
+	man->FillNtupleDColumn(2,6, step_length);
 	man->AddNtupleRow(2);
 }
 

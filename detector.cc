@@ -78,35 +78,40 @@ else if (particleName != "opticalphoton")
 	
 	G4ThreeVector position_start = aStep->GetPreStepPoint()->GetPosition();
 
-	G4double time_start = preStepPoint->GetGlobalTime();
+	G4double time_start = preStepPoint->GetGlobalTime()/CLHEP::ns;
 
-	G4double time_end = preStepPoint->GetGlobalTime();
+	G4double time_end = preStepPoint->GetGlobalTime()/CLHEP::ns;
 
-	G4double edep = aStep->GetTotalEnergyDeposit();
+	G4double edep = aStep->GetTotalEnergyDeposit()/CLHEP::MeV;
 
-	G4int pdg = aStep->GetTrack()->GetDynamicParticle()->GetPDGcode();
+	if(edep!=0)
+	{
+		G4int pdg = aStep->GetTrack()->GetDynamicParticle()->GetPDGcode();
 
-	G4ThreeVector position_end = aStep->GetPostStepPoint()->GetPosition();
+		G4ThreeVector position_end = aStep->GetPostStepPoint()->GetPosition();
 
-	G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
+		G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
+		G4int runID = G4RunManager::GetRunManager()->GetCurrentRun()->GetRunID();
 
-	G4double length = aStep->GetStepLength();
+		G4double length = aStep->GetStepLength()/CLHEP::cm;
 
-	G4AnalysisManager *man = G4AnalysisManager::Instance();
-	man->FillNtupleDColumn(3,0,edep);
-	man->FillNtupleDColumn(3,1,position_start[0]/10);
-	man->FillNtupleDColumn(3,2,position_start[1]/10);
-	man->FillNtupleDColumn(3,3,position_start[2]/10);
-	man->FillNtupleDColumn(3,4,position_end[0]/10);
-	man->FillNtupleDColumn(3,5,position_end[1]/10);
-	man->FillNtupleDColumn(3,6,position_end[2]/10);
-	man->FillNtupleDColumn(3,7,time_start);
-	man->FillNtupleDColumn(3,8,time_end);
-	man->FillNtupleIColumn(3,9,pdg);
-    man->FillNtupleIColumn(3,10,eventID);
-	man->FillNtupleDColumn(3,11,length);
-	man->FillNtupleIColumn(3,12,parentID);
-	man->AddNtupleRow(3);
+		G4AnalysisManager *man = G4AnalysisManager::Instance();
+		man->FillNtupleDColumn(3,0,edep);
+		man->FillNtupleDColumn(3,1,position_start[0]/10);
+		man->FillNtupleDColumn(3,2,position_start[1]/10);
+		man->FillNtupleDColumn(3,3,position_start[2]/10);
+		man->FillNtupleDColumn(3,4,position_end[0]/10);
+		man->FillNtupleDColumn(3,5,position_end[1]/10);
+		man->FillNtupleDColumn(3,6,position_end[2]/10);
+		man->FillNtupleDColumn(3,7,time_start);
+		man->FillNtupleDColumn(3,8,time_end);
+		man->FillNtupleIColumn(3,9,pdg);
+		man->FillNtupleIColumn(3,10,eventID);
+		man->FillNtupleDColumn(3,11,length);
+		man->FillNtupleIColumn(3,12,parentID);
+		man->FillNtupleIColumn(3,13,runID);
+		man->AddNtupleRow(3);
+	}
 }
 
 return true;
