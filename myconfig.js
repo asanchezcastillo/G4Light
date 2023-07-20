@@ -3,7 +3,7 @@
 //  seed: 123456, // Random number seed (omit to use time since Unix epoch)
 
   // Reaction matrix element files
-    reactions: [ "ve40ArCC_Bhattacharya2009.react", "ES.react"],
+    reactions: [ "ve40ArCC_Bhattacharya2009.react"],
   //reactions: ["ES.react" ],
 
   // Neutrino source specification
