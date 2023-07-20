@@ -142,7 +142,7 @@ G4VPhysicalVolume *MyDetectorConstruction::Construct()
 
 	// Hollow box to reflect photons that hit the boundaries
 
-	G4double maxStep = 1/CLHEP::cm;
+	G4double maxStep = 100000/CLHEP::cm;
   	fStepLimit = new G4UserLimits();
 	fStepLimit->SetMaxAllowedStep(maxStep);
   	logicWorld->SetUserLimits(fStepLimit);      

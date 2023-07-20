@@ -54,10 +54,7 @@ SupernovaGenerator::SupernovaGenerator() : G4VUserPrimaryGeneratorAction()
 
 SupernovaGenerator::~SupernovaGenerator()
 {
-delete fMessenger;	
-delete th1_;
-delete th2_;
-delete tfile_;
+  delete fMessenger;	
 }
 
 void SupernovaGenerator::GeneratePrimaries(G4Event* anEvent)
@@ -163,6 +160,11 @@ G4double SupernovaGenerator::SampleTime(G4double neutrino_energy_)
   int const bin_idx = th1_->FindBin(neutrino_energy_);  // energy in MeV
   TH1D * th1_time = th2_->ProjectionX("time", bin_idx, bin_idx+1);
   double const time = th1_time->GetRandom();
+
+  delete th1_;
+  delete th2_;
+  delete tfile_;
+
   return time;
 }
 

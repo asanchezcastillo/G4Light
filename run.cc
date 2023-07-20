@@ -43,7 +43,6 @@ MyRunAction::MyRunAction()
 	man->CreateNtupleIColumn("pdg");
 	man->CreateNtupleIColumn("eventID");
 	man->CreateNtupleDColumn("hit_length");
-	man->CreateNtupleIColumn("trackID");
 	man->CreateNtupleIColumn("run");
     man->FinishNtuple(3);
 
