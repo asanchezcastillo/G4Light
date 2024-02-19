@@ -16,20 +16,6 @@ MyRunAction::MyRunAction()
 	man->CreateNtupleDColumn("Time_local");
 	man->FinishNtuple(0);
 
-	man->CreateNtuple("Scoring", "Scoring");
- 	man->CreateNtupleDColumn("TotalEdep");
-	man->FinishNtuple(1);
-	
-	man->CreateNtuple("EnergyDeposition", "EnergyDeposition");
-    man->CreateNtupleDColumn("edep");
-	man->CreateNtupleDColumn("X");
-	man->CreateNtupleDColumn("Y");
-	man->CreateNtupleDColumn("Z");
-	man->CreateNtupleDColumn("time");
-	man->CreateNtupleIColumn("pdg");
-	man->CreateNtupleDColumn("step_length");
-    man->FinishNtuple(2);
-
  	man->CreateNtuple("Hits", "Hits");
     man->CreateNtupleDColumn("hit_energy_deposit");
 	man->CreateNtupleDColumn("hit_start_x");
@@ -44,7 +30,8 @@ MyRunAction::MyRunAction()
 	man->CreateNtupleIColumn("eventID");
 	man->CreateNtupleDColumn("hit_length");
 	man->CreateNtupleIColumn("run");
-    man->FinishNtuple(3);
+	man->CreateNtupleIColumn("hit_track_id");
+    man->FinishNtuple(1);
 
 	man->CreateNtuple("InitialParticle", "InitialParticle");
     man->CreateNtupleIColumn("InitialParticlePDG");
@@ -52,8 +39,11 @@ MyRunAction::MyRunAction()
 	man->CreateNtupleDColumn("InitialParticlePx");
 	man->CreateNtupleDColumn("InitialParticlePy");
 	man->CreateNtupleDColumn("InitialParticlePz");
+	man->CreateNtupleDColumn("InteractionVertexX");
+	man->CreateNtupleDColumn("InteractionVertexY");
+	man->CreateNtupleDColumn("InteractionVertexZ");
 	man->CreateNtupleDColumn("InteractionTime");
-	man->FinishNtuple(4);
+	man->FinishNtuple(2);
 	
 	man->CreateNtuple("PrimaryParticle", "Primary");
     man->CreateNtupleIColumn("PrimaryParticlePDG");
@@ -61,13 +51,27 @@ MyRunAction::MyRunAction()
 	man->CreateNtupleDColumn("PrimaryParticlePx");
 	man->CreateNtupleDColumn("PrimaryParticlePy");
 	man->CreateNtupleDColumn("PrimaryParticlePz");
-	man->FinishNtuple(5);
+	man->CreateNtupleDColumn("PrimaryParticleTime");
+	man->FinishNtuple(3);
 
 	man->CreateNtuple("Background", "Background");
 	man->CreateNtupleDColumn("DecayTime");
-	man->FinishNtuple(6);
-}
+	man->CreateNtupleIColumn("AtomicNumber");
+	man->CreateNtupleIColumn("AtomicMass");
+	man->CreateNtupleDColumn("BackgroundVertexX");
+	man->CreateNtupleDColumn("BackgroundVertexY");
+	man->CreateNtupleDColumn("BackgroundVertexZ");
+	man->FinishNtuple(4);
 
+	man->CreateNtuple("ParticleTracking", "ParticleTracking");
+	man->CreateNtupleIColumn("PDG");
+	man->CreateNtupleDColumn("Energy");
+	man->CreateNtupleIColumn("TrackID");
+	man->CreateNtupleIColumn("ParentID");
+	man->CreateNtupleSColumn("CreatorProcess");
+	man->CreateNtupleDColumn("CreationTime");
+	man->FinishNtuple(5);
+}
 
 MyRunAction::~MyRunAction()
 {}
@@ -75,21 +79,21 @@ MyRunAction::~MyRunAction()
 void MyRunAction::BeginOfRunAction(const G4Run* run)
 {
 	// First of all is to know where the output file has to be created
+	std::cout << " Starting action " << std::endl;
 	G4AnalysisManager *man = G4AnalysisManager::Instance();	
 	G4int runID = run->GetRunID();
 	std::stringstream strRunID;
 	strRunID << runID;
 	man->OpenFile("analysis/output"+strRunID.str()+ ".root");
 	//Random seed to obtain different events
-	std::cout << " ----------------------------------------> Setting a new seed " << std::endl; 
 	G4Random::setTheEngine(new CLHEP::RanecuEngine());
-	G4long seed = time(NULL);
+	long seed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()).time_since_epoch()).count();
 	G4Random::setTheSeed(seed);
-
 }
 
 void MyRunAction::EndOfRunAction(const G4Run*)
 {
+	std::cout << " Closing action " << std::endl;
     G4AnalysisManager *man = G4AnalysisManager::Instance();
 	man->Write();
     man->CloseFile();

@@ -6,19 +6,9 @@ MySteppingAction::MySteppingAction(MyEventAction *eventAction)
 }
 
 MySteppingAction::~MySteppingAction()
-{}
+{
+}
 
 void MySteppingAction::UserSteppingAction(const G4Step *step)
 {   
-    
-    G4double edep = step->GetTotalEnergyDeposit();
-    G4double step_length = step->GetStepLength();
-    int pdg = step->GetTrack()->GetDynamicParticle()->GetPDGcode();
-    
-    if(pdg!=0 && pdg!=22 && pdg!=-22)
-    {
-    fEventAction->AddEdep(edep);
-    fEventAction->SaveEdep(step);
-    }
-
 }

@@ -6,6 +6,7 @@
 #include "run.hh"
 #include "event.hh"
 #include "stepping.hh"
+#include "trackingaction.hh"	
 #include "G4GenericMessenger.hh"
 
 class MyActionInitialization : public G4VUserActionInitialization
@@ -17,8 +18,7 @@ public:
 	
 	virtual void Build() const;
 	virtual void BuildForMaster() const;
-// The Build function is the main function that will run the particle gun and compute the stepping etc
-
+	// The Build function is the main function that will run the particle gun and compute the stepping etc
 };
 
 #endif

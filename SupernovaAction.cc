@@ -23,6 +23,8 @@ void SupernovaActionInitialization::Build() const
 	SetUserAction(eventAction);
 	MySteppingAction *steppingAction = new MySteppingAction(eventAction);
 	SetUserAction(steppingAction);
+	TrackingAction* trackingAction = new TrackingAction(eventAction);
+  	SetUserAction(trackingAction);
 	
 
 }

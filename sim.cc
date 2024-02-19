@@ -21,11 +21,11 @@
 
 int main(int argc, char** argv)
 {
+
 	//#ifdef G4MULTITHREADED
 	//	G4MTRunManager *runManager = new G4MTRunManager();
 	//	runManager->SetNumberOfThreads(2*(G4Threading::G4GetNumberOfCores()));
 	//#else
-
 		G4RunManager * runManager = new G4RunManager();
 	//#endif
 
@@ -45,6 +45,7 @@ int main(int argc, char** argv)
 	opParams->SetCerenkovTrackSecondariesFirst(false);
 	physics_list->RegisterPhysics (opticalPhysics);
 	*/
+
 	runManager->SetUserInitialization(physics_list);
 
 	char* marleyFile=0;
@@ -75,8 +76,8 @@ int main(int argc, char** argv)
 
 	if(marleyFile==0 && generatorFile==0)
 	{              
-	runManager->SetUserInitialization(new MyActionInitialization());
-	runManager->Initialize();
+		runManager->SetUserInitialization(new MyActionInitialization());
+		runManager->Initialize();
         G4UImanager *UImanager = G4UImanager::GetUIpointer();
         UImanager->ApplyCommand("/process/inactivate Cerenkov");
         UImanager->ApplyCommand("/process/inactivate Scintillation");
@@ -105,7 +106,6 @@ int main(int argc, char** argv)
 			UImanager->ApplyCommand("/control/execute " + marFile);
 			runManager->BeamOn(1);
 		}
-
 	}
 
 	if(generatorFile!=0)

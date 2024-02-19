@@ -26,8 +26,6 @@
 
 SupernovaGenerator::SupernovaGenerator() : G4VUserPrimaryGeneratorAction()
 {
-  unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-  // std::default_random_engine generator(seed);
   fMessenger = new G4GenericMessenger(this, "/SNGenerator/", "Marley input");
   fMessenger->DeclareProperty("MarleyConfig", marleyConfig, "Name of the Marley configuration file.");
   fMessenger->DeclareProperty("NSNNeutrino", NSNNeutrino, "Number of SN neutrino");
@@ -67,6 +65,7 @@ void SupernovaGenerator::GeneratePrimaries(G4Event* anEvent)
 void SupernovaGenerator::MarleyGeneratePrimaries(G4Event* anEvent)
 { 
   G4AnalysisManager *man = G4AnalysisManager::Instance();
+
   // Create a new primary vertex 
   vertex = new G4PrimaryVertex(0, 0, 0, 0); // x,y,z,t0
 
@@ -78,6 +77,19 @@ void SupernovaGenerator::MarleyGeneratePrimaries(G4Event* anEvent)
   //std::cout << ev << '\n';
     G4double neutrino_energy;
     G4double interaction_time;
+    G4ThreeVector vertexPosition = {0.,0.,0.};
+    if(randomVertex_)  // Random vertex position generation
+    {
+      vertexPosition = RandomVertex(GenVolX,GenVolY,GenVolZ);
+//     std::cout << " Y Position is: "  << vertexPosition[1] << std::endl;
+    }
+    else // Fixed vertex position generation
+    {
+      vertexPosition[0] = vertex_x_;
+      vertexPosition[1] = vertex_y_;
+      vertexPosition[2] = vertex_z_;
+    }
+
     for ( const auto& fp : ev.get_initial_particles() ) {
     // Get the initial particles of the event. This is just to store this information into the tree.
     G4PrimaryParticle* particle = new G4PrimaryParticle( fp->pdg_code(), fp->px(), fp->py(), fp->pz(), fp->total_energy() );
@@ -88,40 +100,36 @@ void SupernovaGenerator::MarleyGeneratePrimaries(G4Event* anEvent)
     G4double InitialPx = particle->GetPx();
     G4double InitialPy = particle->GetPy();
     G4double InitialPz = particle->GetPz();
-/*    if (std::abs(particle->GetPDGcode()) == 12 or
+   if (std::abs(particle->GetPDGcode()) == 12 or
     std::abs(particle->GetPDGcode()) == 14 or
     std::abs(particle->GetPDGcode()) == 16 or
     std::abs(particle->GetPDGcode()) == 18)
-    */
     {
       neutrino_energy=InitialEnergy;
-      interaction_time=SampleTime(neutrino_energy);
-      man->FillNtupleIColumn(4,0,InitialPDG);
-      man->FillNtupleDColumn(4,1,InitialEnergy);
-      man->FillNtupleDColumn(4,2,InitialPx);
-      man->FillNtupleDColumn(4,3,InitialPx);
-      man->FillNtupleDColumn(4,4,InitialPx);
-      man->FillNtupleDColumn(4,5,interaction_time);
-      man->AddNtupleRow(4);            // MeV  
+      interaction_time=int((G4UniformRand()) * time_window*ns);
+      man->FillNtupleIColumn(2,0,InitialPDG);
+      man->FillNtupleDColumn(2,1,InitialEnergy);
+      man->FillNtupleDColumn(2,2,InitialPx);
+      man->FillNtupleDColumn(2,3,InitialPy);
+      man->FillNtupleDColumn(2,4,InitialPz);
+      man->FillNtupleDColumn(2,5,vertexPosition[0]/cm);
+      man->FillNtupleDColumn(2,6,vertexPosition[1]/cm);
+      man->FillNtupleDColumn(2,7,vertexPosition[2]/cm);
+      man->FillNtupleDColumn(2,8,interaction_time);
+      man->AddNtupleRow(2);            // MeV  
     }
-  
   }
-  G4ThreeVector vertexPosition;
-  if(randomVertex_)  // Random vertex position generation
-  {
-    vertexPosition = RandomVertex(GenVolX,GenVolY,GenVolZ);
-  }
-  else // Fixed vertex position generation
-  {
-    vertexPosition[0] = vertex_x_;
-    vertexPosition[1] = vertex_y_;
-    vertexPosition[2] = vertex_z_;
-  }
+
   vertex->SetPosition(vertexPosition[0], vertexPosition[1], vertexPosition[2]); // x,y,z,t0
+
+  interaction_time=time_window/2;
   vertex->SetT0(interaction_time);
 
+  std::cout << " I have set the interaction time to be " << interaction_time << std::endl;
+
   // Loop over each of the final particles in the MARLEY event. These are the particles to be tracked and the only ones relevant for G4. 
-  for ( const auto& fp : ev.get_final_particles() ) {
+  for ( const auto& fp : ev.get_final_particles() ) 
+  {
     // Convert each one from a marley::Particle into a G4PrimaryParticle.
     // Do this by first setting the PDG code and the 4-momentum components.
     G4PrimaryParticle* particle = new G4PrimaryParticle( fp->pdg_code(), fp->px(), fp->py(), fp->pz(), fp->total_energy() );
@@ -134,17 +142,19 @@ void SupernovaGenerator::MarleyGeneratePrimaries(G4Event* anEvent)
     G4double PrimaryPx = particle->GetPx();
     G4double PrimaryPy = particle->GetPy();
     G4double PrimaryPz = particle->GetPz();
-    man->FillNtupleIColumn(5,0,PrimaryPDG);
-    man->FillNtupleDColumn(5,1,PrimaryEnergy);
-    man->FillNtupleDColumn(5,2,PrimaryPx);
-    man->FillNtupleDColumn(5,3,PrimaryPy);
-    man->FillNtupleDColumn(5,4,PrimaryPz);
-    man->AddNtupleRow(5);            // MeV
+    man->FillNtupleIColumn(3,0,PrimaryPDG);
+    man->FillNtupleDColumn(3,1,PrimaryEnergy);
+    man->FillNtupleDColumn(3,2,PrimaryPx);
+    man->FillNtupleDColumn(3,3,PrimaryPy);
+    man->FillNtupleDColumn(3,4,PrimaryPz);
+    man->FillNtupleDColumn(3,5,interaction_time);
+    man->AddNtupleRow(3);            // MeV
   }
   // The primary vertex has been fully populated with all final-state particles
   // from the MARLEY event. Add it to the G4Event object so that Geant4 can
   // begin tracking the particles through the simulated geometry.
   anEvent->AddPrimaryVertex( vertex );
+  
 }
 
 // ............. SampleTime ............. //
@@ -173,11 +183,12 @@ G4double SupernovaGenerator::SampleTime(G4double neutrino_energy_)
 
 G4ThreeVector SupernovaGenerator::RandomVertex(G4double GenVolX_, G4double GenVolY_, G4double GenVolZ_)
 {
+  /*
   G4double vertexX = GenVolX_ * (G4UniformRand()-0.5);
   G4double vertexY = GenVolY_ * (G4UniformRand()-0.5);
   G4double vertexZ = GenVolZ_ * (G4UniformRand()-0.5);
-  G4ThreeVector vertexPosition = G4ThreeVector(vertexX,vertexY,vertexZ);
-
+  */
+  G4ThreeVector vertexPosition = G4ThreeVector(GenVolX_ * (G4UniformRand()-0.5),GenVolY_ * (G4UniformRand()-0.5),GenVolZ_ * (G4UniformRand()-0.5));
   return vertexPosition;
 }
 
@@ -201,44 +212,44 @@ void SupernovaGenerator::BackgroundGeneratePrimaries(G4Event* anEvent)
 {
   for(int i =0 ; i< nAr39 ; i++)
   {
-  G4double decay_time = (G4UniformRand()) * time_window*ns;
-  Generate_Radioisotope(anEvent, 18, 39, decay_time);
+    G4double decay_time = (G4UniformRand()) * time_window*ns;
+    Generate_Radioisotope(anEvent, 18, 39, decay_time);
   }
 
   for(int i =0 ; i< nAr42 ; i++)
   {
-  G4double decay_time = (G4UniformRand()) * time_window*ns;
-  Generate_Radioisotope(anEvent, 18, 42, decay_time);
+    G4double decay_time = (G4UniformRand()) * time_window*ns;
+    Generate_Radioisotope(anEvent, 18, 42, decay_time);
   }
 
   for(int i =0 ; i< nKr85 ; i++)
   {
-  G4double decay_time = (G4UniformRand()) * time_window*ns;
-  Generate_Radioisotope(anEvent, 36, 85, decay_time);
+    G4double decay_time = (G4UniformRand()) * time_window*ns;
+    Generate_Radioisotope(anEvent, 36, 85, decay_time);
   }
 
   for(int i =0 ; i< nK42 ; i++)
   {
-  G4double decay_time = (G4UniformRand()) * time_window*ns;
-  Generate_Radioisotope(anEvent, 19, 42, decay_time);
+    G4double decay_time = (G4UniformRand()) * time_window*ns;
+    Generate_Radioisotope(anEvent, 19, 42, decay_time);
   }
 
   for(int i =0 ; i< nBi214 ; i++)
   {
-  G4double decay_time = (G4UniformRand()) * time_window*ns;
-  Generate_Radioisotope(anEvent, 83, 214, decay_time);
+    G4double decay_time = (G4UniformRand()) * time_window*ns;
+    Generate_Radioisotope(anEvent, 83, 214, decay_time);
   }
 
   for(int i =0 ; i< nPb214 ; i++)
   {
-  G4double decay_time = (G4UniformRand()) * time_window*ns;
-  Generate_Radioisotope(anEvent, 82, 214, decay_time);
+    G4double decay_time = (G4UniformRand()) * time_window*ns;
+    Generate_Radioisotope(anEvent, 82, 214, decay_time);
   }
 
   for(int i =0 ; i< nRn222 ; i++)
   {
-  G4double decay_time = (G4UniformRand()) * time_window*ns;
-  Generate_Radioisotope(anEvent, 86, 222, decay_time);
+    G4double decay_time = (G4UniformRand())*time_window*ns;
+    Generate_Radioisotope(anEvent, 86, 222, decay_time);
   }
 }
 
@@ -257,8 +268,13 @@ particle->SetKineticEnergy(1.*eV);
 G4ThreeVector vertexPosition = RandomVertex(GenVolX,GenVolY,GenVolZ);
 G4PrimaryVertex* bg_vertex = new G4PrimaryVertex(vertexPosition, decay_time);
 G4AnalysisManager *man = G4AnalysisManager::Instance();
-man->FillNtupleDColumn(6,0,decay_time);
-man->AddNtupleRow(6);           
+man->FillNtupleDColumn(4,0,decay_time);
+man->FillNtupleIColumn(4,1,Atomic_Number);
+man->FillNtupleIColumn(4,2, Atomic_Mass);
+man->FillNtupleDColumn(4,3,vertexPosition[0]/cm);
+man->FillNtupleDColumn(4,4,vertexPosition[1]/cm);
+man->FillNtupleDColumn(4,5,vertexPosition[2]/cm);
+man->AddNtupleRow(4);           
 bg_vertex->SetPrimary(particle);
 anEvent->AddPrimaryVertex(bg_vertex);
 }

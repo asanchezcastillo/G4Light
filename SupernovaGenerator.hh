@@ -5,6 +5,7 @@
 #include "G4SystemOfUnits.hh"
 #include "G4ParticleTable.hh"
 #include "G4GeneralParticleSource.hh"
+#include "detector.hh"
 // Standard library includes
 #include <string>
 
@@ -32,6 +33,8 @@ public:
         ~SupernovaGenerator();
 
         virtual void GeneratePrimaries(G4Event*);
+        double GetTimeWindow(){return time_window;}
+
 // This si creating the primary particles that are going to be propagated by the Build() function in the 
 // MyActionInitialization class
 private:

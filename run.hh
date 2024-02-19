@@ -5,6 +5,7 @@
 #include "G4Run.hh"
 #include "G4AnalysisManager.hh"
 #include "Randomize.hh"
+#include <sys/time.h>
 
 class MyRunAction : public G4UserRunAction
 {

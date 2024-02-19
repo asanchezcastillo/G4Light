@@ -6,6 +6,7 @@
 #include "run.hh"
 #include "event.hh"
 #include "stepping.hh"
+#include "trackingaction.hh"	
 #include "G4GenericMessenger.hh"
 #include "SupernovaGenerator.hh"
 
